@@ -7,11 +7,19 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
 	<script>
-      document.addEventListener("mousedown", function(event) {
-        if (event.button === 1) {
-          event.preventDefault(); 
-        }
-      });
+	document.addEventListener("mousedown", function(event) {
+		if (event.button === 1) { // Средняя кнопка мыши
+			event.preventDefault(); // Отключаем стандартное поведение
+			document.body.style.cursor = "default"; // Принудительно сбрасываем курсор
+		}
+	});
+
+	document.addEventListener("mouseup", function(event) {
+		if (event.button === 1) { 
+		event.preventDefault(); 
+		document.body.style.cursor = "default"; 
+		}
+	});
     </script>
   </head>
   <body>
