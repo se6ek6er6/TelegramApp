@@ -7,28 +7,32 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <script>
-      window.onload = function() {
-        console.log("Page Loaded");
+      let unityInstance = null;
 
-        // Пытаемся отправить сообщение в Unity после загрузки страницы
+      // Функция для отправки сообщения в Unity
+      function sendMessageToUnity() {
+        if (unityInstance) {
+          try {
+            unityInstance.SendMessage('DataLoader', 'GetStorageData', "https://se6ek6er6.github.io/server/Test.csv");
+            console.log("Message sent to Unity.");
+          } catch (error) {
+            console.error("Error sending message to Unity:", error);
+          }
+        }
+      }
+
+      window.onload = function() {
         const params = new URLSearchParams(window.location.search);
         const fileUrl = params.get("file");
 
         if (fileUrl) {
           try {
-            console.log("Sending file URL to Unity:", fileUrl);
-            SendMessage('DataLoader', 'GetStorageData', fileUrl);
+            sendMessageToUnity();
           } catch (error) {
-            console.error("Ошибка при передаче файла в Unity:", error);
+            console.error("Error when passing file to Unity:", error);
           }
         } else {
-          // Если файла в параметрах нет, отправляем стандартный файл
-          try {
-            console.log("Sending default file to Unity");
-            SendMessage('DataLoader', 'GetStorageData', "https://se6ek6er6.github.io/server/Test.csv");
-          } catch (error) {
-            console.error("Ошибка при передаче файла в Unity:", error);
-          }
+          sendMessageToUnity();  // Send message when the page loads
         }
       };
 
@@ -58,7 +62,6 @@
       </div>
       <div id="unity-warning"> </div>
     </div>
-
     <script>
       var container = document.querySelector("#unity-container");
       var canvas = document.querySelector("#unity-canvas");
@@ -104,6 +107,7 @@
         document.getElementsByTagName('head')[0].appendChild(meta);
         container.className = "unity-mobile";
         canvas.className = "unity-mobile";
+
         unityShowBanner('WebGL builds are not supported on mobile devices.');
       } else {
         canvas.style.width = "100%";
@@ -117,14 +121,10 @@
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
-        }).then((unityInstance) => {
+        }).then((unityInstanceLoaded) => {
+          unityInstance = unityInstanceLoaded;  // Save the Unity instance
           loadingBar.style.display = "none";
-          // Вызываем отправку сообщения в Unity, когда Unity инициализировано
-          try {
-            SendMessage('DataLoader', 'GetStorageData', "https://se6ek6er6.github.io/server/Test.csv");
-          } catch (error) {
-            console.error("Ошибка при отправке сообщения в Unity после инициализации:", error);
-          }
+          sendMessageToUnity();  // Now that Unity is loaded, we can send the message
         }).catch((message) => {
           alert(message);
         });
