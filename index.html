@@ -17,6 +17,7 @@
 			try {
 			  // Получаем параметры URL один раз
 			  const params = new URLSearchParams(window.location.search);
+			  console.log(params);
 			  fileUrl = params.get("file");  // Сохраняем значение параметра fileUrl
 			  console.log(fileUrl); // Печатает значение параметра file
 
