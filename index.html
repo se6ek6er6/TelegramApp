@@ -9,6 +9,7 @@
 	<script>
 
 	window.onload = function() {
+		SendMessage('DataLoader', 'GetStorageData', "https://se6ek6er6.github.io/server/Test.csv");
 		const params = new URLSearchParams(window.location.search);
 		const fileUrl = params.get("file");
 
