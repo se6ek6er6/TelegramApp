@@ -12,7 +12,6 @@
 
 		// Функция для отправки сообщения в Unity
 		function sendMessageToUnity() {
-		  unityInstance.SendMessage('DataLoader', 'GetStorageData', "https://storage.yandexcloud.net/report-system-storage/aaaa.csv");
 		  if (unityInstance) {
 			try {
 			  const params = new URLSearchParams(window.location.search);
@@ -24,12 +23,12 @@
 				
 				try {
 				  unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
-				  console.log("✅ Sent to Unity:", fileUrl);
+				  console.log("Sent to Unity:", fileUrl);
 				} catch (error) {
-				  console.error("❌ Unity message error:", error);
+				  console.error("Unity message error:", error);
 				}
 			  } else {
-				console.warn("⚠️ No file parameter found.");
+				console.warn("No file parameter found.");
 			  }
 			} catch (error) {
 			  console.error("Error sending message to Unity:", error);
