@@ -10,33 +10,49 @@
 		let unityInstance = null;
 		let fileUrl = null;  // Перемещаем определение fileUrl за пределы функции
 
-		// Функция для отправки сообщения в Unity
-		function sendMessageToUnity() {
-		  if (unityInstance) {
-			try {
-			  const params = new URLSearchParams(window.location.search);
-			  fileUrl = params.get("file");
+		function getFileUrl() {
+  const params = new URLSearchParams(window.location.search);
+  let fileUrl = params.get("file");
 
-			  if (fileUrl) {
-				fileUrl = decodeURIComponent(fileUrl); // Раскодируем URL
-				console.log("Extracted file URL:", fileUrl);
-				
-				try {
-				  unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
-				  console.log("Sent to Unity:", fileUrl);
-				} catch (error) {
-				  console.error("Unity message error:", error);
-				}
-			  } else {
-				console.warn("No file parameter found.");
-			  }
-			} catch (error) {
-			  console.error("Error sending message to Unity:", error);
-			}
-		  } else {
-			console.log("Unity instance is not available.");
-		  }
-		}
+  // Если параметр не найден в URL, пытаемся извлечь его из WebApp API (для Desktop)
+  if (!fileUrl && window.Telegram?.WebApp) {
+    try {
+      const initData = window.Telegram.WebApp.initDataUnsafe;
+	  console.log(window.Telegram.WebApp.initDataUnsafe); // Посмотреть, что в нем хранится
+
+      if (initData) {
+        // Пример того, как можно извлечь параметр из initDataUnsafe (нужно уточнить формат данных)
+        const urlParams = new URLSearchParams(initData);
+        fileUrl = urlParams.get("file");  // Если параметр "file" присутствует в initData
+      }
+    } catch (error) {
+      console.error("Ошибка получения данных из initDataUnsafe", error);
+    }
+  }
+
+  return fileUrl ? decodeURIComponent(fileUrl) : null;
+}
+
+function sendMessageToUnity() {
+  if (unityInstance) {
+    fileUrl = getFileUrl(); // Получаем ссылку
+
+    if (fileUrl) {
+      console.log("Extracted file URL:", fileUrl);
+      try {
+        unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
+        console.log("Sent to Unity:", fileUrl);
+      } catch (error) {
+        console.error("Unity message error:", error);
+      }
+    } else {
+      console.warn("No file parameter found.");
+    }
+  } else {
+    console.log("Unity instance is not available.");
+  }
+}
+
 
 
       document.addEventListener("mousedown", function(event) {
