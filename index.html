@@ -11,47 +11,55 @@
 		let fileUrl = null;  // Перемещаем определение fileUrl за пределы функции
 
 		function getFileUrl() {
-  const params = new URLSearchParams(window.location.search);
-  let fileUrl = params.get("file");
+        console.log("getFileUrl: start");
+        const params = new URLSearchParams(window.location.search);
+        let fileUrl = params.get("file");
 
-  // Если параметр не найден в URL, пытаемся извлечь его из WebApp API (для Desktop)
-  if (!fileUrl && window.Telegram?.WebApp) {
-    try {
-      const initData = window.Telegram.WebApp.initDataUnsafe;
-	  console.log(window.Telegram.WebApp.initDataUnsafe); // Посмотреть, что в нем хранится
+        console.log("getFileUrl: param 'file' =", fileUrl);
 
-      if (initData) {
-        // Пример того, как можно извлечь параметр из initDataUnsafe (нужно уточнить формат данных)
-        const urlParams = new URLSearchParams(initData);
-        fileUrl = urlParams.get("file");  // Если параметр "file" присутствует в initData
+        // Если параметр не найден в URL, пытаемся извлечь его из WebApp API (для Desktop)
+        if (!fileUrl && window.Telegram?.WebApp) {
+          try {
+            const initData = window.Telegram.WebApp.initDataUnsafe;
+            console.log("getFileUrl: initDataUnsafe =", initData); // Посмотреть, что в нем хранится
+
+            if (initData) {
+              // Пример того, как можно извлечь параметр из initDataUnsafe (нужно уточнить формат данных)
+              const urlParams = new URLSearchParams(initData);
+              fileUrl = urlParams.get("file");  // Если параметр "file" присутствует в initData
+              console.log("getFileUrl: extracted fileUrl from initData =", fileUrl);
+            }
+          } catch (error) {
+            console.error("getFileUrl: Ошибка получения данных из initDataUnsafe", error);
+          }
+        }
+
+        console.log("getFileUrl: return fileUrl =", fileUrl);
+        return fileUrl ? decodeURIComponent(fileUrl) : null;
       }
-    } catch (error) {
-      console.error("Ошибка получения данных из initDataUnsafe", error);
-    }
-  }
 
-  return fileUrl ? decodeURIComponent(fileUrl) : null;
-}
+      function sendMessageToUnity() {
+        console.log("sendMessageToUnity: start");
+        if (unityInstance) {
+          fileUrl = getFileUrl(); // Получаем ссылку
 
-function sendMessageToUnity() {
-  if (unityInstance) {
-    fileUrl = getFileUrl(); // Получаем ссылку
+          console.log("sendMessageToUnity: fileUrl =", fileUrl);
 
-    if (fileUrl) {
-      console.log("Extracted file URL:", fileUrl);
-      try {
-        unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
-        console.log("Sent to Unity:", fileUrl);
-      } catch (error) {
-        console.error("Unity message error:", error);
+          if (fileUrl) {
+            console.log("sendMessageToUnity: Sending fileUrl to Unity");
+            try {
+              unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
+              console.log("sendMessageToUnity: Sent to Unity:", fileUrl);
+            } catch (error) {
+              console.error("sendMessageToUnity: Ошибка отправки сообщения в Unity", error);
+            }
+          } else {
+            console.warn("sendMessageToUnity: No file parameter found.");
+          }
+        } else {
+          console.log("sendMessageToUnity: Unity instance is not available.");
+        }
       }
-    } else {
-      console.warn("No file parameter found.");
-    }
-  } else {
-    console.log("Unity instance is not available.");
-  }
-}
 
 
 
