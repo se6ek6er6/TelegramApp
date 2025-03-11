@@ -12,6 +12,7 @@
 
 		// Функция для отправки сообщения в Unity
 		function sendMessageToUnity() {
+		  unityInstance.SendMessage('DataLoader', 'GetStorageData', "https://se6ek6er6.github.io/server/Test.csv");
 		  if (unityInstance) {
 			try {
 			  // Получаем параметры URL один раз
