@@ -7,15 +7,40 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
 	<script>
-	window.onload = function() {
+	var unityInstance;
+
+	window.onload = function () 
+	{
 		const params = new URLSearchParams(window.location.search);
 		const fileUrl = params.get("file");
 
-		if (fileUrl) {
-			try {
-				SendMessage('DataLoader', 'GetStorageData', fileUrl);
-			} catch (error) {
-				console.error("Ошибка при передаче файла в Unity:", error);
+		if (fileUrl) 
+		{
+			if (unityInstance) 
+			{
+				try 
+				{
+					unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
+				} 
+				catch (error) 
+				{
+					console.error("Ошибка при передаче файла в Unity:", error);
+				}
+			} 
+			else 
+			{
+				console.log("Unity еще не загружен, ожидаем...");
+				document.addEventListener("UnityLoaded", function () 
+				{
+					try 
+					{
+						unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
+					} 
+					catch (error) 
+					{
+						console.error("Ошибка при передаче файла в Unity после загрузки:", error);
+					}
+				});
 			}
 		}
 	};
@@ -134,11 +159,13 @@
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
-        }).then((unityInstance) => {
-          loadingBar.style.display = "none";
-          //fullscreenButton.onclick = () => {
-            //unityInstance.SetFullscreen(1);
-          //};
+        }).then((Instance) => {
+			unityInstance = instance;
+			loadingBar.style.display = "none";
+			document.dispatchEvent(new Event("UnityLoaded"));
+			//fullscreenButton.onclick = () => {
+			//unityInstance.SetFullscreen(1);
+			//};
         }).catch((message) => {
           alert(message);
         });
