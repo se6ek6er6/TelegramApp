@@ -12,8 +12,11 @@
 		const fileUrl = params.get("file");
 
 		if (fileUrl) {
-			console.log("Получен файл:", fileUrl);
-			SendMessage('DataLoader', 'GetStorageData', fileUrl); // Отправляем в Unity
+			try {
+				SendMessage('DataLoader', 'GetStorageData', fileUrl);
+			} catch (error) {
+				console.error("Ошибка при передаче файла в Unity:", error);
+			}
 		}
 	};
 	
