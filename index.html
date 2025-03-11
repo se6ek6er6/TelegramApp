@@ -7,34 +7,33 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <script>
-      let unityInstance = null;
+		let unityInstance = null;
+		let fileUrl = null;  // Перемещаем определение fileUrl за пределы функции
 
-      // Функция для отправки сообщения в Unity
-      function sendMessageToUnity() {
-        if (unityInstance) {
-          try {
-            unityInstance.SendMessage('DataLoader', 'GetStorageData', "https://se6ek6er6.github.io/server/Test.csv");
-            console.log("Message sent to Unity.");
-          } catch (error) {
-            console.error("Error sending message to Unity:", error);
-          }
-        }
-      }
+		// Функция для отправки сообщения в Unity
+		function sendMessageToUnity() {
+		  if (unityInstance) {
+			try {
+			  // Получаем параметры URL один раз
+			  const params = new URLSearchParams(window.location.search);
+			  fileUrl = params.get("file");  // Сохраняем значение параметра fileUrl
 
-      window.onload = function() {
-        const params = new URLSearchParams(window.location.search);
-        const fileUrl = params.get("file");
+			  if (fileUrl) {
+				// Если файл URL существует, отправляем сообщение в Unity
+				unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
+				console.log("Message sent to Unity with file URL.");
+			  } else {
+				// Если fileUrl нет, вы можете отправить другое сообщение или сделать что-то по умолчанию
+				console.log("No file URL in the parameters.");
+			  }
+			} catch (error) {
+			  console.error("Error sending message to Unity:", error);
+			}
+		  } else {
+			console.log("Unity instance is not available.");
+		  }
+		}
 
-        if (fileUrl) {
-          try {
-            sendMessageToUnity();
-          } catch (error) {
-            console.error("Error when passing file to Unity:", error);
-          }
-        } else {
-          sendMessageToUnity();  // Send message when the page loads
-        }
-      };
 
       document.addEventListener("mousedown", function(event) {
         if (event.button === 1) { // Средняя кнопка мыши
