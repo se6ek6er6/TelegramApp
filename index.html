@@ -15,19 +15,21 @@
 		  unityInstance.SendMessage('DataLoader', 'GetStorageData', "https://storage.yandexcloud.net/report-system-storage/aaaa.csv");
 		  if (unityInstance) {
 			try {
-			  // Получаем параметры URL один раз
 			  const params = new URLSearchParams(window.location.search);
-			  console.log(params);
-			  fileUrl = params.get("file");  // Сохраняем значение параметра fileUrl
-			  console.log(fileUrl); // Печатает значение параметра file
+			  let fileUrl = params.get("file");
 
 			  if (fileUrl) {
-				// Если файл URL существует, отправляем сообщение в Unity
-				unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
-				console.log("Message sent to Unity with file URL.");
+				fileUrl = decodeURIComponent(fileUrl); // Раскодируем URL
+				console.log("Extracted file URL:", fileUrl);
+				
+				try {
+				  unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
+				  console.log("✅ Sent to Unity:", fileUrl);
+				} catch (error) {
+				  console.error("❌ Unity message error:", error);
+				}
 			  } else {
-				// Если fileUrl нет, вы можете отправить другое сообщение или сделать что-то по умолчанию
-				console.log("No file URL in the parameters.");
+				console.warn("⚠️ No file parameter found.");
 			  }
 			} catch (error) {
 			  console.error("Error sending message to Unity:", error);
