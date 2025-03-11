@@ -15,7 +15,7 @@
 		  if (unityInstance) {
 			try {
 			  const params = new URLSearchParams(window.location.search);
-			  let fileUrl = params.get("file");
+			  fileUrl = params.get("file");
 
 			  if (fileUrl) {
 				fileUrl = decodeURIComponent(fileUrl); // Раскодируем URL
