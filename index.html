@@ -7,6 +7,16 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
 	<script>
+	window.onload = function() {
+		const params = new URLSearchParams(window.location.search);
+		const fileUrl = params.get("file");
+
+		if (fileUrl) {
+			console.log("Получен файл:", fileUrl);
+			SendMessage('DataLoader', 'GetStorageData', fileUrl); // Отправляем в Unity
+		}
+	};
+	
 	document.addEventListener("mousedown", function(event) {
 		if (event.button === 1) { // Средняя кнопка мыши
 			event.preventDefault(); // Отключаем стандартное поведение
@@ -21,17 +31,7 @@
 		}
 	});
     </script>
-	<script>
-	window.onload = function() {
-		const params = new URLSearchParams(window.location.search);
-		const fileUrl = params.get("file");
-
-		if (fileUrl) {
-			console.log("Получен файл:", fileUrl);
-			SendMessage('DataLoader', 'SetFileUrl', fileUrl); // Отправляем в Unity
-		}
-	};
-	</script>
+	
 
   </head>
   <body>
