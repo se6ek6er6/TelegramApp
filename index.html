@@ -9,38 +9,15 @@
 	<script>
 	var unityInstance;
 
-	window.onload = function () 
-	{
+	window.onload = function() {
 		const params = new URLSearchParams(window.location.search);
 		const fileUrl = params.get("file");
 
-		if (fileUrl) 
-		{
-			if (unityInstance) 
-			{
-				try 
-				{
-					unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
-				} 
-				catch (error) 
-				{
-					console.error("Ошибка при передаче файла в Unity:", error);
-				}
-			} 
-			else 
-			{
-				console.log("Unity еще не загружен, ожидаем...");
-				document.addEventListener("UnityLoaded", function () 
-				{
-					try 
-					{
-						unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
-					} 
-					catch (error) 
-					{
-						console.error("Ошибка при передаче файла в Unity после загрузки:", error);
-					}
-				});
+		if (fileUrl) {
+			try {
+				SendMessage('DataLoader', 'GetStorageData', "https://se6ek6er6.github.io/server/Test.csv");
+			} catch (error) {
+				console.error("Ошибка при передаче файла в Unity:", error);
 			}
 		}
 	};
@@ -159,10 +136,8 @@
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
-        }).then((Instance) => {
-			unityInstance = instance;
+        }).then((unityInstance) => {
 			loadingBar.style.display = "none";
-			document.dispatchEvent(new Event("UnityLoaded"));
 			//fullscreenButton.onclick = () => {
 			//unityInstance.SetFullscreen(1);
 			//};
