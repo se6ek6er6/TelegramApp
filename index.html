@@ -18,6 +18,7 @@
 			  // Получаем параметры URL один раз
 			  const params = new URLSearchParams(window.location.search);
 			  fileUrl = params.get("file");  // Сохраняем значение параметра fileUrl
+			  console.log(fileUrl); // Печатает значение параметра file
 
 			  if (fileUrl) {
 				// Если файл URL существует, отправляем сообщение в Unity
