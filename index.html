@@ -14,8 +14,8 @@
 		function sendMessageToUnity() {
 		  if (unityInstance) {
 			try {
-			  const params = new URLSearchParams(window.location.href);
-			  console.log("HREF - ", URLSearchParams(window.location.href))
+			  const urlParams = new URLSearchParams(window.location.search);  // Используем новый оператор для правильного создания URLSearchParams
+				console.log("HREF - ", window.location.search);
 			  let fileUrl = params.get("file");
 
 			  if (fileUrl) {
