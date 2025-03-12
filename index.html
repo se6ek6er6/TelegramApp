@@ -7,39 +7,11 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <script>
-		var unityInstance;
-
-	  window.onload = function () {
-		const params = new URLSearchParams(window.location.search);
-		const fileUrl = params.get("file");
-
-		if (fileUrl) {
-			fileUrl = decodeURIComponent(fileUrl);
-		  if (unityInstance) {
-			try {
-			  unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
-			} catch (error) {
-			  console.error("Ошибка при передаче файла в Unity:", error);
-			}
-		  } else {
-			console.log("Unity еще не загружен, ожидаем...");
-			document.addEventListener("UnityLoaded", function () {
-			  try {
-				unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
-			  } catch (error) {
-				console.error("Ошибка при передаче файла в Unity после загрузки:", error);
-			  }
-			});
-		  }
-		}
-	  };
-
       document.addEventListener("mousedown", function(event) {
         console.log("mousedown event: button =", event.button);
-        if (event.button === 1) { // Средняя кнопка мыши
-          event.preventDefault(); // Отключаем стандартное поведение
-          document.body.style.cursor = "default"; // Принудительно сбрасываем курсор
-          console.log("mousedown: Средняя кнопка мыши, курсор сброшен");
+        if (event.button === 1) { 
+          event.preventDefault(); 
+          document.body.style.cursor = "default";
         }
       });
 
@@ -48,7 +20,6 @@
         if (event.button === 1) {
           event.preventDefault(); 
           document.body.style.cursor = "default"; 
-          console.log("mouseup: Средняя кнопка мыши, курсор сброшен");
         }
       });
     </script>
@@ -130,23 +101,20 @@
 
       var script = document.createElement("script");
       script.src = loaderUrl;
+	  console.log("url - ", loaderUrl)
       script.onload = () => {
-        console.log("Script: loader script loaded");
         createUnityInstance(canvas, config, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
-          console.log("Script: Loading progress =", progress);
-        }).then((unityInstanceLoaded) => {
-          unityInstance = unityInstanceLoaded;  // Save the Unity instance
+        }).then((unityInstance) => {
           loadingBar.style.display = "none";
-          document.dispatchEvent(new Event("UnityLoaded"));
+          <!-- fullscreenButton.onclick = () => { -->
+            <!-- unityInstance.SetFullscreen(1); -->
+          <!-- }; -->
         }).catch((message) => {
           alert(message);
-          console.error("Script: Unity instance loading failed", message);
         });
       };
       document.body.appendChild(script);
-
-      console.log("Script: end");
     </script>
   </body>
 </html>
