@@ -8,58 +8,35 @@
     <link rel="stylesheet" href="TemplateData/style.css">
     <script>
       let unityInstance = null;
+let fileUrl = null;  // Перемещаем определение fileUrl за пределы функции
 
-      // Функция для получения параметра file из URL
-      function getFileUrl() {
-        console.log("getFileUrl: start");
+// Функция для отправки сообщения в Unity
+function sendMessageToUnity() {
+  if (unityInstance) {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      fileUrl = params.get("file");  // Убираем "let", используем глобальную переменную
 
-        const params = new URLSearchParams(window.location.search);
-        let fileUrl = params.get("file");
+      if (fileUrl) {
+        fileUrl = decodeURIComponent(fileUrl); // Раскодируем URL
+        console.log("Extracted file URL:", fileUrl);
 
-        console.log("getFileUrl: param 'file' =", fileUrl);
-
-        if (!fileUrl && window.Telegram?.WebApp) {
-          try {
-            const initData = window.Telegram.WebApp.initDataUnsafe;
-            console.log("getFileUrl: initDataUnsafe =", initData);
-
-            if (initData) {
-              const urlParams = new URLSearchParams(initData);
-              fileUrl = urlParams.get("file");
-              console.log("getFileUrl: extracted fileUrl from initData =", fileUrl);
-            }
-          } catch (error) {
-            console.error("getFileUrl: Ошибка получения данных из initDataUnsafe", error);
-          }
+        try {
+          unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
+          console.log("Sent to Unity:", fileUrl);
+        } catch (error) {
+          console.error("Unity message error:", error);
         }
-
-        console.log("getFileUrl: return fileUrl =", fileUrl);
-        return fileUrl ? decodeURIComponent(fileUrl) : null;
+      } else {
+        console.warn("No file parameter found.");
       }
-
-      // Функция для отправки сообщения в Unity
-      function sendMessageToUnity() {
-        console.log("sendMessageToUnity: start");
-        if (unityInstance) {
-          const fileUrl = getFileUrl(); // Получаем ссылку
-
-          console.log("sendMessageToUnity: fileUrl =", fileUrl);
-
-          if (fileUrl) {
-            console.log("sendMessageToUnity: Sending fileUrl to Unity");
-            try {
-              unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
-              console.log("sendMessageToUnity: Sent to Unity:", fileUrl);
-            } catch (error) {
-              console.error("sendMessageToUnity: Ошибка отправки сообщения в Unity", error);
-            }
-          } else {
-            console.warn("sendMessageToUnity: No file parameter found.");
-          }
-        } else {
-          console.log("sendMessageToUnity: Unity instance is not available.");
-        }
-      }
+    } catch (error) {
+      console.error("Error sending message to Unity:", error);
+    }
+  } else {
+    console.log("Unity instance is not available.");
+  }
+}
 
       document.addEventListener("mousedown", function(event) {
         console.log("mousedown event: button =", event.button);
