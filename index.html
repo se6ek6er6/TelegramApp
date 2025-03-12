@@ -7,32 +7,49 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <script>
-	function getQueryParam(param) {
-        console.log("getQueryParam: Начало выполнения функции");
-        const params = new URLSearchParams(window.location.search);
-        console.log("getQueryParam: Полученные параметры URL:", params.toString());
+		let unityInstance = null;
+		let fileUrl = null;  // Перемещаем определение fileUrl за пределы функции
 
-        if (params.has(param)) {
-          const value = params.get(param);
-          console.log(`getQueryParam: Найден параметр '${param}' со значением '${value}'`);
-          return value;
-        } else {
-          console.log(`getQueryParam: Параметр '${param}' не найден в URL`);
-          return null;
-        }
-      }
-	  
+		// Функция для отправки сообщения в Unity
+		function sendMessageToUnity() {
+		  unityInstance.SendMessage('DataLoader', 'GetStorageData', "https://storage.yandexcloud.net/report-system-storage/aaaa.csv");
+		  if (unityInstance) {
+			try {
+			  const params = new URLSearchParams(window.location.href);
+			  console.log("HREF - ", URLSearchParams(window.location.href))
+			  let fileUrl = params.get("file");
+
+			  if (fileUrl) {
+				fileUrl = decodeURIComponent(fileUrl); // Раскодируем URL
+				console.log("Extracted file URL:", fileUrl);
+				
+				try {
+				  unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
+				  console.log("Sent to Unity:", fileUrl);
+				} catch (error) {
+				  console.error("Unity message error:", error);
+				}
+			  } else {
+				console.warn("No file parameter found.");
+			  }
+			} catch (error) {
+			  console.error("Error sending message to Unity:", error);
+			}
+		  } else {
+			console.log("Unity instance is not available.");
+		  }
+		}
+
+
       document.addEventListener("mousedown", function(event) {
-        console.log("mousedown event: button =", event.button);
-        if (event.button === 1) { 
-          event.preventDefault(); 
-          document.body.style.cursor = "default";
+        if (event.button === 1) { // Средняя кнопка мыши
+          event.preventDefault(); // Отключаем стандартное поведение
+          document.body.style.cursor = "default"; // Принудительно сбрасываем курсор
         }
       });
 
       document.addEventListener("mouseup", function(event) {
-        console.log("mouseup event: button =", event.button);
-        if (event.button === 1) {
+        if (event.button === 1) { 
           event.preventDefault(); 
           document.body.style.cursor = "default"; 
         }
@@ -58,12 +75,9 @@
       var warningBanner = document.querySelector("#unity-warning");
 
       function unityShowBanner(msg, type) {
-        console.log("unityShowBanner: start, msg =", msg, "type =", type);
         function updateBannerVisibility() {
           warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-          console.log("unityShowBanner: banner visibility updated");
         }
-
         var div = document.createElement('div');
         div.innerHTML = msg;
         warningBanner.appendChild(div);
@@ -73,7 +87,6 @@
           setTimeout(function() {
             warningBanner.removeChild(div);
             updateBannerVisibility();
-            console.log("unityShowBanner: removed banner after timeout");
           }, 5000);
         }
         updateBannerVisibility();
@@ -81,8 +94,6 @@
 
       var buildUrl = "Build";
       var loaderUrl = buildUrl + "/TelegramApp.loader.js";
-      console.log("Script: loaderUrl =", loaderUrl);
-
       var config = {
         dataUrl: buildUrl + "/TelegramApp.data",
         frameworkUrl: buildUrl + "/TelegramApp.framework.js",
@@ -95,7 +106,6 @@
       };
 
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        console.log("Script: Mobile device detected");
         var meta = document.createElement('meta');
         meta.name = 'viewport';
         meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
@@ -110,25 +120,16 @@
       }
 
       loadingBar.style.display = "block";
-      console.log("Script: loadingBar displayed");
 
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
-        }).then((unityInstance) => {
+        }).then((unityInstanceLoaded) => {
+          unityInstance = unityInstanceLoaded;  // Save the Unity instance
           loadingBar.style.display = "none";
-		  const fileUrl = getQueryParam("file");
-          if (fileUrl) {
-            console.log("Передача ссылки в Unity: ", fileUrl);
-            unityInstance.SendMessage("YourUnityObject", "LoadFile", fileUrl);
-          } else {
-            console.log("URL файла не найден в параметрах запроса.");
-          }
-          <!-- fullscreenButton.onclick = () => { -->
-            <!-- unityInstance.SetFullscreen(1); -->
-          <!-- }; -->
+          sendMessageToUnity();  // Now that Unity is loaded, we can send the message
         }).catch((message) => {
           alert(message);
         });
