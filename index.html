@@ -7,41 +7,32 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <script>
-      let unityInstance = null;
-let fileUrl = null;  // Перемещаем определение fileUrl за пределы функции
+		var unityInstance;
 
-// Функция для отправки сообщения в Unity
-function sendMessageToUnity() {
-  if (unityInstance) {
-    try {
-      const params = new URLSearchParams(window.location.search);
+	  window.onload = function () {
+		const params = new URLSearchParams(window.location.search);
+		const fileUrl = params.get("file");
 
-for (const [key, value] of params) {
-  console.log(`${key}: ${value}`);
-}
-
-      fileUrl = params.get("file");  // Убираем "let", используем глобальную переменную
-
-      if (fileUrl) {
-        fileUrl = decodeURIComponent(fileUrl); // Раскодируем URL
-        console.log("Extracted file URL:", fileUrl);
-
-        try {
-          unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
-          console.log("Sent to Unity:", fileUrl);
-        } catch (error) {
-          console.error("Unity message error:", error);
-        }
-      } else {
-        console.warn("No file parameter found.");
-      }
-    } catch (error) {
-      console.error("Error sending message to Unity:", error);
-    }
-  } else {
-    console.log("Unity instance is not available.");
-  }
-}
+		if (fileUrl) {
+			fileUrl = decodeURIComponent(fileUrl);
+		  if (unityInstance) {
+			try {
+			  unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
+			} catch (error) {
+			  console.error("Ошибка при передаче файла в Unity:", error);
+			}
+		  } else {
+			console.log("Unity еще не загружен, ожидаем...");
+			document.addEventListener("UnityLoaded", function () {
+			  try {
+				unityInstance.SendMessage('DataLoader', 'GetStorageData', fileUrl);
+			  } catch (error) {
+				console.error("Ошибка при передаче файла в Unity после загрузки:", error);
+			  }
+			});
+		  }
+		}
+	  };
 
       document.addEventListener("mousedown", function(event) {
         console.log("mousedown event: button =", event.button);
@@ -145,10 +136,9 @@ for (const [key, value] of params) {
           progressBarFull.style.width = 100 * progress + "%";
           console.log("Script: Loading progress =", progress);
         }).then((unityInstanceLoaded) => {
-          console.log("Script: Unity instance loaded");
           unityInstance = unityInstanceLoaded;  // Save the Unity instance
           loadingBar.style.display = "none";
-          sendMessageToUnity();  // Now that Unity is loaded, we can send the message
+          document.dispatchEvent(new Event("UnityLoaded"));
         }).catch((message) => {
           alert(message);
           console.error("Script: Unity instance loading failed", message);
