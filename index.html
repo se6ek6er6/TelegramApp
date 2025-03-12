@@ -7,26 +7,25 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <script>
-		let unityInstance = null;
-		let fileUrl = null;  // Перемещаем определение fileUrl за пределы функции
+      let unityInstance = null;
 
-		function getFileUrl() {
+      // Функция для получения параметра file из URL
+      function getFileUrl() {
         console.log("getFileUrl: start");
+
         const params = new URLSearchParams(window.location.search);
         let fileUrl = params.get("file");
 
         console.log("getFileUrl: param 'file' =", fileUrl);
 
-        // Если параметр не найден в URL, пытаемся извлечь его из WebApp API (для Desktop)
         if (!fileUrl && window.Telegram?.WebApp) {
           try {
             const initData = window.Telegram.WebApp.initDataUnsafe;
-            console.log("getFileUrl: initDataUnsafe =", initData); // Посмотреть, что в нем хранится
+            console.log("getFileUrl: initDataUnsafe =", initData);
 
             if (initData) {
-              // Пример того, как можно извлечь параметр из initDataUnsafe (нужно уточнить формат данных)
               const urlParams = new URLSearchParams(initData);
-              fileUrl = urlParams.get("file");  // Если параметр "file" присутствует в initData
+              fileUrl = urlParams.get("file");
               console.log("getFileUrl: extracted fileUrl from initData =", fileUrl);
             }
           } catch (error) {
@@ -38,10 +37,11 @@
         return fileUrl ? decodeURIComponent(fileUrl) : null;
       }
 
+      // Функция для отправки сообщения в Unity
       function sendMessageToUnity() {
         console.log("sendMessageToUnity: start");
         if (unityInstance) {
-          fileUrl = getFileUrl(); // Получаем ссылку
+          const fileUrl = getFileUrl(); // Получаем ссылку
 
           console.log("sendMessageToUnity: fileUrl =", fileUrl);
 
@@ -61,19 +61,21 @@
         }
       }
 
-
-
       document.addEventListener("mousedown", function(event) {
+        console.log("mousedown event: button =", event.button);
         if (event.button === 1) { // Средняя кнопка мыши
           event.preventDefault(); // Отключаем стандартное поведение
           document.body.style.cursor = "default"; // Принудительно сбрасываем курсор
+          console.log("mousedown: Средняя кнопка мыши, курсор сброшен");
         }
       });
 
       document.addEventListener("mouseup", function(event) {
-        if (event.button === 1) { 
+        console.log("mouseup event: button =", event.button);
+        if (event.button === 1) {
           event.preventDefault(); 
           document.body.style.cursor = "default"; 
+          console.log("mouseup: Средняя кнопка мыши, курсор сброшен");
         }
       });
     </script>
@@ -90,6 +92,8 @@
       <div id="unity-warning"> </div>
     </div>
     <script>
+      console.log("Script: start");
+
       var container = document.querySelector("#unity-container");
       var canvas = document.querySelector("#unity-canvas");
       var loadingBar = document.querySelector("#unity-loading-bar");
@@ -97,9 +101,12 @@
       var warningBanner = document.querySelector("#unity-warning");
 
       function unityShowBanner(msg, type) {
+        console.log("unityShowBanner: start, msg =", msg, "type =", type);
         function updateBannerVisibility() {
           warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+          console.log("unityShowBanner: banner visibility updated");
         }
+
         var div = document.createElement('div');
         div.innerHTML = msg;
         warningBanner.appendChild(div);
@@ -109,6 +116,7 @@
           setTimeout(function() {
             warningBanner.removeChild(div);
             updateBannerVisibility();
+            console.log("unityShowBanner: removed banner after timeout");
           }, 5000);
         }
         updateBannerVisibility();
@@ -116,6 +124,8 @@
 
       var buildUrl = "Build";
       var loaderUrl = buildUrl + "/TelegramApp.loader.js";
+      console.log("Script: loaderUrl =", loaderUrl);
+
       var config = {
         dataUrl: buildUrl + "/TelegramApp.data",
         frameworkUrl: buildUrl + "/TelegramApp.framework.js",
@@ -128,6 +138,7 @@
       };
 
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        console.log("Script: Mobile device detected");
         var meta = document.createElement('meta');
         meta.name = 'viewport';
         meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
@@ -142,21 +153,28 @@
       }
 
       loadingBar.style.display = "block";
+      console.log("Script: loadingBar displayed");
 
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
+        console.log("Script: loader script loaded");
         createUnityInstance(canvas, config, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
+          console.log("Script: Loading progress =", progress);
         }).then((unityInstanceLoaded) => {
+          console.log("Script: Unity instance loaded");
           unityInstance = unityInstanceLoaded;  // Save the Unity instance
           loadingBar.style.display = "none";
           sendMessageToUnity();  // Now that Unity is loaded, we can send the message
         }).catch((message) => {
           alert(message);
+          console.error("Script: Unity instance loading failed", message);
         });
       };
       document.body.appendChild(script);
+
+      console.log("Script: end");
     </script>
   </body>
 </html>
