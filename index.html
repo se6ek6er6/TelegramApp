@@ -17,7 +17,7 @@
 			  const params = new URLSearchParams(window.location.href);
 			  console.log("HREF - ", params);
 			  let fileUrl = params.get("file");
-
+				console.log("url - ", fileUrl);
 			  if (fileUrl) {
 				fileUrl = decodeURIComponent(fileUrl); // Раскодируем URL
 				console.log("Extracted file URL:", fileUrl);
